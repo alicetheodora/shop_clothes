@@ -1,3 +1,5 @@
+import org.jasypt.util.password.BasicPasswordEncryptor;
+
 public class Client {
     private String first_name;
     private String last_name;
@@ -13,6 +15,7 @@ public class Client {
     public void setFirst_name(String first_name) {
         this.first_name = first_name;
     }
+
     public String getLast_name() {
         return last_name;
     }
@@ -42,7 +45,9 @@ public class Client {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        BasicPasswordEncryptor passwordEncryptor = new BasicPasswordEncryptor();
+        this.password = passwordEncryptor.encryptPassword(password);
+        //to check if entered password is correct, use passwordEncryptor.checkPassword(password, encryptedPassword)
     }
 
     public String getEmail() {
@@ -60,7 +65,6 @@ public class Client {
                 ", last_name='" + last_name + '\'' +
                 ", id=" + id +
                 ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
                 ", email=" + email +
                 '}';
     }
