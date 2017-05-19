@@ -34,13 +34,13 @@ public class DbConnect {
 
     public DbConnect() {
         try {
-
-            Class.forName("com.mysql.jdbc.Driver");
+            //library com.mysql.jdbc.Driver" now imported via Maven
+            //"ClassNotFoundException" catch no longer needed
+            //Class.forName("com.mysql.jdbc.Driver");
             con = DriverManager.getConnection("jdbc:mysql://localhost:3306/shop", "root", "");
             st = con.createStatement();
-
-        }catch (ClassNotFoundException|NullPointerException|SQLException s) {
-            System.out.println("Erro:" + s);
+        }catch (NullPointerException|SQLException s) {
+            System.out.println("Error:" + s);
         }
     }
 
@@ -60,7 +60,7 @@ public class DbConnect {
                 System.out.println(clients_list);
             }
         } catch (NullPointerException|SQLException s) {
-            System.out.println("Erro:" + s);
+            System.out.println("Error:" + s);
         }
 
     }

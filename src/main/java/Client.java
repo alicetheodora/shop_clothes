@@ -1,5 +1,9 @@
 import org.jasypt.util.password.BasicPasswordEncryptor;
-
+/*
+Table format:
+id first_name last_name username password (encrypted!!!) email
+id = primary key
+*/
 public class Client {
     private String first_name;
     private String last_name;
