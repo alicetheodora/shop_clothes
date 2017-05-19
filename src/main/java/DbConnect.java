@@ -65,4 +65,27 @@ public class DbConnect {
 
     }
 
+    public void createUser(){
+        try {
+            //make a function getValues for username register
+			//and update after insert
+            rs = st.executeQuery("insert into client(username, id,first_name,last_name,email,password) values (getValues())");
+            List<Client> clients_list = new ArrayList<Client>();
+            while (rs.next()) {
+                Client cl = new Client();
+                cl.setUsername(rs.getString("username"));
+                cl.setId(rs.getInt("id"));
+                cl.setFirst_name(rs.getString("first_name"));
+                cl.setLast_name(rs.getString("last_name"));
+                cl.setEmail(rs.getString("email"));
+                cl.setPassword(rs.getString("password"));
+                clients_list.add(cl);
+                System.out.println(clients_list);
+            }
+        } catch (NullPointerException|SQLException s) {
+            System.out.println("Error:" + s);
+        }
+
+    }
+
 }
