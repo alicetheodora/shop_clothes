@@ -1,3 +1,5 @@
+import org.jasypt.util.password.BasicPasswordEncryptor;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +53,6 @@ public class DbConnect {
             while (rs.next()) {
                 Client cl = new Client();
                 cl.setUsername(rs.getString("username"));
-                cl.setId(rs.getInt("id"));
                 cl.setFirst_name(rs.getString("first_name"));
                 cl.setLast_name(rs.getString("last_name"));
                 cl.setEmail(rs.getString("email"));
@@ -65,6 +66,51 @@ public class DbConnect {
 
     }
 
+    public boolean loginCheck(String userIn, String passIn){
+        String encryptedPassword;
+        try{
+            rs = st.executeQuery("SELECT password FROM client WHERE username = '" + userIn + "'");
+            BasicPasswordEncryptor passwordEncryptor = new BasicPasswordEncryptor();
+            // gotta run rs.next
+            if( rs.next() ) {
+                encryptedPassword = rs.getString("password");
+                System.out.println("Encrypted password == " + encryptedPassword);
+                if (passwordEncryptor.checkPassword(passIn, encryptedPassword) == true)
+                    return true;
+            }
+                return false;
+
+        } catch(NullPointerException|SQLException s){
+            System.out.println("Error:" + s);
+            return false;
+        }
+    }
+
+    public boolean checkAdmin(String userIn){
+        try{
+            rs = st.executeQuery("SELECT admin FROM client WHERE username = '" + userIn + "'");
+            if(rs.next())
+                if(rs.getBoolean("admin") == true )
+                    return true;
+            return false;
+
+        } catch(NullPointerException|SQLException s){
+            System.out.println("Error:" + s);
+            return false;
+        }
+    }
+
+    public void addClient(Client newClient){
+        try {
+            String adminStatus = "FALSE"; //change to "TRUE" when adding admins for debugging purposes, otherwise "FALSE" because this is how SQL works
+            st.executeUpdate("insert into client(first_name, last_name, username, password, email, admin) values( '" +
+                    newClient.getFirst_name() + "', '" + newClient.getLast_name() + "', '" + newClient.getUsername() + "', '" + newClient.getPassword() + "', '" + newClient.getEmail() + "', " + adminStatus + ")");
+        } catch(NullPointerException|SQLException s){
+            System.out.println("Error:" + s);
+            return;
+        }
+    }
+
     public void createUser(){
         try {
             //make a function getValues for username register
@@ -74,7 +120,6 @@ public class DbConnect {
             while (rs.next()) {
                 Client cl = new Client();
                 cl.setUsername(rs.getString("username"));
-                cl.setId(rs.getInt("id"));
                 cl.setFirst_name(rs.getString("first_name"));
                 cl.setLast_name(rs.getString("last_name"));
                 cl.setEmail(rs.getString("email"));

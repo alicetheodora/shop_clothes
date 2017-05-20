@@ -4,17 +4,22 @@ id product_id client_id quantity price_total date status
 id = primary key
 product_id = foreign id (the product which the client has purchased, points to the Product table)
 client_id = foreign id (which client has made the purchase, points to the Client table)
-status = pending / completed
+status = pending / completed / in_cart
 price_total = Product.quantity * Product.price
 
  */
+
 public class Transaction extends Product{
+    private int id;
     private int product_key;
     private int client_id;
     private int price_total;
-    private boolean status;
+    //private boolean status; //Removed "status" variable, instead we use the "pending / completed / cart" variables
     private boolean pending;
     private boolean completed;
+    private boolean cart;
+    private String date;
+
 
 
     public boolean isPending() {
@@ -33,7 +38,15 @@ public class Transaction extends Product{
         this.completed = completed;
     }
 
-    public int getProduct_key() {
+    public boolean isCart(){
+        return cart;
+    }
+
+    public void setCart(boolean cart){
+        this.cart = cart;
+    }
+
+    public int isProduct_key() {
         return product_key;
     }
 
@@ -51,32 +64,42 @@ public class Transaction extends Product{
     }
 
 
-    public int getPrice_total() {
-        return price_total = getQuantity() * getPrice();
-    }
-
     public void setPrice_total(int price_total) {
         this.price_total = price_total;
     }
 
 
     public boolean isStatus() {
-        if (getClient_id() == 0) {
-            status= isPending();
-            System.out.printf("Transaction in pending");
-            return true;
-        } else {
-            status = isCompleted();
-            System.out.println("Transaction is completed");
-            return false;
-        }
+        if(isCart()){
+            System.out.println("Transaction is in cart.");
+        }else
+            if(isPending()){
+                System.out.println("Transaction is pending.");
+            }
+            else
+                if(isCompleted()) {
+                    System.out.println("Transaction is completed."); //when working with transactions, it only uses one of 3 statuses
+                }
+                else
+                    return false; //status not set
+        return true;
     }
 
 
-    public void setStatus(boolean status) {
-      this.status=status;
+    public boolean setStatus(String status) {
+        cart = pending = completed = false;
+        status = status.toLowerCase();
+        if(status == "cart"){
+            cart = true;
+        }else
+            if(status == "pending")
+                pending = true;
+            else
+                if(status == "completed")
+                    completed = true;
+                else
+                    return false; //unrecognised status variable
+        return true;
     }
-
-
 
 }

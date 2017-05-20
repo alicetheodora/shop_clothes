@@ -1,39 +1,25 @@
 /*
 Table format:
-id name description price sizes
-id = primary key
+name = primary key
 sizes = string with sizes separated by space ' '
 available sizes: XS S M L XL XXL XXXL
 quantity
  */
 public class Product {
-    private int id;
     private String name;
     private String description;
     private int price;
     private String []s = new String[7];
-    private int quantity;
+    private String size;
 
 
-    public int getQuantity() {
-        return quantity;
+    public String getSize() {
+        return size;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public void setSize(String size) {
+        this.size = size;
     }
-
-
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-
 
     public String getName() {
         return name;
