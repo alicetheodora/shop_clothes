@@ -18,10 +18,10 @@ public class Client {
     private Boolean admin;
 
     Client() {
-        first_name = new String();
-        last_name = new String();
-        username = new String();
-        password = new String();
+        first_name = new String("");
+        last_name = new String("");
+        username = new String("");
+        password = new String("");
         email = new String();
         admin = false;
     }
@@ -34,21 +34,37 @@ public class Client {
         try {
             System.out.println("First Name: ");
             first_name = reader.readLine();
+            while(first_name.equals("")){
+                System.out.println("First name must not be null.");
+                first_name = reader.readLine();
+            }
             if (first_name.toLowerCase().equals("cancel"))
                 return false;
 
             System.out.println("Last Name: ");
             last_name = reader.readLine();
+            while(last_name.equals("")){
+                System.out.println("Last name must not be null.");
+                last_name = reader.readLine();
+            }
             if (last_name.toLowerCase().equals("cancel"))
                 return false;
 
             System.out.println("Username: ");
             username = reader.readLine();
+            if(username.equals("")){
+                System.out.println("Username must not be null.");
+                username = reader.readLine();
+            }
             if (username.toLowerCase().equals("cancel"))
                 return false;
 
             System.out.println("Password: ");
             aux = reader.readLine();
+            while(aux.equals("")){
+                System.out.println("Password must not be null.");
+                aux = reader.readLine();
+            }
             if (aux.toLowerCase().equals("cancel"))
                 return false;
             setPassword(aux);
@@ -63,7 +79,8 @@ public class Client {
                 if (!aux.contains("@") ||
                         aux.indexOf('@') != aux.lastIndexOf('@') ||
                         !aux.contains(".") ||
-                        aux.indexOf('@') > aux.lastIndexOf('.'))
+                        aux.indexOf('@') > aux.lastIndexOf('.')
+                        || aux.length() < 4)
                     System.out.println("Email must be valid.");
                 else
                     email = aux;
@@ -122,15 +139,5 @@ public class Client {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    @Override
-    public String toString() {
-        return "Person{" +
-                "first_name='" + first_name + '\'' +
-                ", last_name='" + last_name + '\'' +
-                ", username='" + username + '\'' +
-                ", email=" + email +
-                '}';
     }
 }

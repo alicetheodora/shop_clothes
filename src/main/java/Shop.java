@@ -7,7 +7,6 @@ public class Shop {
     Shop(){
         try {
             connect = new DbConnect();
-            connect.getData();
             connectedToShop = true;
         }catch (Exception e){
             System.out.println("Error! Could not connect to database from Shop class.");
@@ -98,7 +97,7 @@ public class Shop {
                 System.out.println("Welcome " + currentUser);
                 System.out.println("Please select an option:");
                 System.out.println("1. Register new client user.\n" +
-                        "2. Add new clothing categories. (not implemented)\n" +
+                        "2. Add new clothing categories.\n" +
                         "3. Add new clothes in store categories. (not implemented)\n" +
                         "4. View existing categories. (not implemented)\n" +
                         "5. View pending orders. (not implemented)\n" +
@@ -112,7 +111,10 @@ public class Shop {
                     switch (val) {
                         case 1:
                             registerClient(); //reduces clutter in the Shop class, but if email is already taken, we have to do it all over again
+                            System.out.println("User has been registered succesfully!");
+                            break;
                         case 2:
+                            addCategory();
                             break;
                         case 3:
                             break;
@@ -137,5 +139,29 @@ public class Shop {
         if( newClient.init() == true ){
             connect.addClient(newClient);
         }
+    }
+
+    private void addCategory(){
+        System.out.println("Please type in the new clothing categories you would like to add, or \"cancel\" if you are finished adding new clothing categories.");
+        String aux = new String("");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        while(true) { //you quit via cancel
+            try {
+                aux = reader.readLine();
+                while (aux.equals("")) {
+                    System.out.println("Category must not be null.");
+                    aux = reader.readLine();
+                }
+                if(aux.toLowerCase().equals("cancel"))
+                    return;
+                if( connect.insertCategory(aux) == false ){
+                    System.out.println("Category already exists.");
+                }
+            } catch (Exception e) {
+                System.out.println("Could not read line, in Shop.addCategory()");
+                System.out.println("Error: " + e);
+            }
+        }
+
     }
 }

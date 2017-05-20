@@ -111,26 +111,31 @@ public class DbConnect {
         }
     }
 
-    public void createUser(){
+    public boolean searchCategory(String auxCategory){
         try {
-            //make a function getValues for username register
-			//and update after insert
-            rs = st.executeQuery("insert into client(username, id,first_name,last_name,email,password) values (getValues())");
-            List<Client> clients_list = new ArrayList<Client>();
-            while (rs.next()) {
-                Client cl = new Client();
-                cl.setUsername(rs.getString("username"));
-                cl.setFirst_name(rs.getString("first_name"));
-                cl.setLast_name(rs.getString("last_name"));
-                cl.setEmail(rs.getString("email"));
-                cl.setPassword(rs.getString("password"));
-                clients_list.add(cl);
-                System.out.println(clients_list);
+            rs = st.executeQuery("SELECT category FROM category WHERE category = '" + auxCategory + "'");
+            if(rs.next()) {
+                if (rs.getString("category").equals(auxCategory))
+                    return true;
             }
-        } catch (NullPointerException|SQLException s) {
+            return false;
+        } catch(NullPointerException|SQLException s){
             System.out.println("Error:" + s);
+            return false;
         }
+    }
 
+    public boolean insertCategory(String newCategory){
+        if(searchCategory(newCategory.toLowerCase()) == true)
+            return false;
+        try {
+            st.executeUpdate("insert into category(category) values( '" + newCategory + "')");
+            System.out.println("Category added!");
+            return true;
+        } catch(NullPointerException|SQLException s){
+            System.out.println("Error:" + s);
+            return false;
+        }
     }
 
 }
