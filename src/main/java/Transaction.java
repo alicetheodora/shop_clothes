@@ -11,9 +11,10 @@ price_total = Product.quantity * Product.price
 
 public class Transaction extends Product{
     private int id;
-    private int product_key;
-    private int client_id;
+    private int product_name;
+    private int client_email;
     private int price_total;
+    private int quantity;
     //private boolean status; //Removed "status" variable, instead we use the "pending / completed / cart" variables
     private boolean pending;
     private boolean completed;
@@ -46,21 +47,19 @@ public class Transaction extends Product{
         this.cart = cart;
     }
 
-    public int isProduct_key() {
-        return product_key;
+    public int getProduct_name() { return product_name; }
+
+    public void setPpoduct_name(int product_name) {
+        this.product_name = product_name;
     }
 
-    public void setProduct_key(int product_key) {
-        this.product_key = product_key;
+
+    public int getClient_email() {
+        return client_email;
     }
 
-
-    public int getClient_id() {
-        return client_id;
-    }
-
-    public void setClient_id(int client_id) {
-        this.client_id = client_id;
+    public void setClient_email(int client_email) {
+        this.client_email = client_email;
     }
 
 

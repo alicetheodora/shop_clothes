@@ -74,7 +74,6 @@ public class DbConnect {
             // gotta run rs.next
             if( rs.next() ) {
                 encryptedPassword = rs.getString("password");
-                System.out.println("Encrypted password == " + encryptedPassword);
                 if (passwordEncryptor.checkPassword(passIn, encryptedPassword) == true)
                     return true;
             }
@@ -105,6 +104,7 @@ public class DbConnect {
             String adminStatus = "FALSE"; //change to "TRUE" when adding admins for debugging purposes, otherwise "FALSE" because this is how SQL works
             st.executeUpdate("insert into client(first_name, last_name, username, password, email, admin) values( '" +
                     newClient.getFirst_name() + "', '" + newClient.getLast_name() + "', '" + newClient.getUsername() + "', '" + newClient.getPassword() + "', '" + newClient.getEmail() + "', " + adminStatus + ")");
+            System.out.println("User has been registered succesfully!");
         } catch(NullPointerException|SQLException s){
             System.out.println("Error:" + s);
             return;
@@ -125,15 +125,89 @@ public class DbConnect {
         }
     }
 
+    public Product getProduct(String auxProduct){
+        try {
+            rs = st.executeQuery("SELECT * FROM product WHERE name = '" + auxProduct + "'");
+            rs.next();
+            Product result = new Product();
+            result.setName(rs.getString("name"));
+            result.setDescription(rs.getString("description"));
+            result.setPrice(rs.getInt("price"));
+            result.setSize(rs.getString("size"));
+            result.setCategory(rs.getString("category"));
+            return result;
+        }catch(NullPointerException|SQLException s){
+            System.out.println("Error: " + s);
+            return null;
+        }
+    }
+
     public boolean insertCategory(String newCategory){
         if(searchCategory(newCategory.toLowerCase()) == true)
             return false;
         try {
-            st.executeUpdate("insert into category(category) values( '" + newCategory + "')");
+            st.executeUpdate("insert into category(category) values( '" + newCategory.toLowerCase() + "')");
             System.out.println("Category added!");
             return true;
         } catch(NullPointerException|SQLException s){
             System.out.println("Error:" + s);
+            return false;
+        }
+    }
+
+    public boolean insertProduct(String category){
+        Product newProduct = new Product();
+        if( newProduct.init(category) == false )
+            return false;
+        try {
+            rs = st.executeQuery("SELECT category FROM category WHERE category = '" + category.toLowerCase() + "'");
+            rs.next();
+            st.executeUpdate("insert into product(name, description, price, size, category) values( '"
+                    + newProduct.getName().toLowerCase() + "', '" + newProduct.getDescription().toLowerCase() + "', '" + newProduct.getPrice() + "', '" + newProduct.getSize().toUpperCase() + "', '" + rs.getString("category") + "')");
+            return true;
+        } catch(NullPointerException|SQLException s){
+            System.out.println("Error in DbConnect.insertProduct: " + s);
+            return false;
+        }
+    }
+
+    public void viewCategories(){
+        try {
+            rs = st.executeQuery("SELECT category FROM category");
+            while(rs.next()){
+                System.out.println(rs.getString("category"));
+            }
+        } catch(NullPointerException|SQLException s){
+            System.out.println("Error: " + s);
+            return;
+        }
+    }
+
+    public void viewProductsByCategory(String category){
+        try{
+            rs = st.executeQuery("SELECT * FROM product WHERE category = '" + category.toLowerCase() + "'");
+            while(rs.next()){
+                System.out.println("Name: \"" + rs.getString("name") +
+                "\"; Description: \"" + rs.getString("description") +
+                "\"; Price: " + rs.getInt("price") +
+                "\"; Size: \"" + rs.getString("size") + "\"");
+            }
+        }catch(NullPointerException|SQLException s){
+            System.out.println("Error: " + s);
+            return;
+        }
+    }
+
+    public boolean addToCart(Product auxProduct, String clientEmail, int quantity){
+        try {
+            st.executeUpdate("INSERT into TRANSACTION(product_name, client_email, price_total, quantity, status, date) values ('" +
+            auxProduct.getName() + "', '" +
+            clientEmail + "', " +
+            quantity*auxProduct.getPrice() + ", " +
+            quantity + ", 'cart', (select SYSDATE()) )");
+            return true;
+        } catch(NullPointerException|SQLException s){
+            System.out.println("Error in DbConnect.insertProduct: " + s);
             return false;
         }
     }

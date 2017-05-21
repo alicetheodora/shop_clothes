@@ -1,3 +1,5 @@
+import sun.reflect.annotation.ExceptionProxy;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
@@ -66,8 +68,8 @@ public class Shop {
             while (true) { //you may exit via return;
                 System.out.println("Welcome " + currentUser);
                 System.out.println("Please select an option:");
-                System.out.println("1. View products by category / categories. (not implemented)\n" +
-                        "2. Order a product. (not implemented)\n" +
+                System.out.println("1. View products by category.\n" +
+                        "2. Order a product.\n" +
                         "3. View shopping basket. (not implemented)\n" +
                         "4. Confirm order. (not implemented)\n" +
                         "5. Logout.");
@@ -78,8 +80,10 @@ public class Shop {
                 }
                     switch (val) {
                         case 1:
+                            viewProductsByCategory();
                             break;
                         case 2:
+                            orderProduct(currentUser);
                             break;
                         case 3:
                             break;
@@ -94,15 +98,18 @@ public class Shop {
         } else
         if(adminRights == true) { //Administrator Screen
             while (true) {
-                System.out.println("Welcome " + currentUser);
-                System.out.println("Please select an option:");
-                System.out.println("1. Register new client user.\n" +
-                        "2. Add new clothing categories.\n" +
-                        "3. Add new clothes in store categories. (not implemented)\n" +
-                        "4. View existing categories. (not implemented)\n" +
-                        "5. View pending orders. (not implemented)\n" +
-                        "6. View order history. (not implemented)\n" +
-                        "7. Logout.\n");
+                if(val != 4 && val !=5 && val != 6) {
+                    System.out.println("Welcome " + currentUser);
+                    System.out.println("Please select an option:");
+                    System.out.println("1. Register new client user.\n" +
+                            "2. Add new clothing categories.\n" +
+                            "3. Add new clothes in store categories.\n" +
+                            "4. View existing categories.\n" +
+                            "5. View pending orders. (not implemented)\n" +
+                            "6. View order history. (not implemented)\n" +
+                            "7. Logout.\n");
+                }else
+                    System.out.println("Please select an option:");
                 try {
                     val = Integer.parseInt(reader.readLine());
                 } catch(Exception e){
@@ -111,14 +118,15 @@ public class Shop {
                     switch (val) {
                         case 1:
                             registerClient(); //reduces clutter in the Shop class, but if email is already taken, we have to do it all over again
-                            System.out.println("User has been registered succesfully!");
                             break;
                         case 2:
                             addCategory();
                             break;
                         case 3:
+                            addProduct();
                             break;
                         case 4:
+                            connect.viewCategories();
                             break;
                         case 5:
                             break;
@@ -162,6 +170,92 @@ public class Shop {
                 System.out.println("Error: " + e);
             }
         }
+    }
 
+    private void addProduct(){
+        String auxCategory = new String("");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        while(true){ //quit via cancel
+            try{
+                System.out.println("Please type in the category you would like to edit, or \"cancel\" to go back to menu.");
+                auxCategory = reader.readLine();
+                if( auxCategory.toLowerCase().equals("cancel") )
+                    return;
+                while(connect.searchCategory(auxCategory) == false){
+                    System.out.println("Category must exist.");
+                    auxCategory = reader.readLine();
+                    if( auxCategory.toLowerCase().equals("cancel") )
+                        return;
+                }
+                while(connect.insertProduct(auxCategory) == true); //keeps adding items until the user types "cancel", then he can pick a different cateogry
+            }catch (Exception e){
+                System.out.println("Could not read line, in Shop.addProduct()");
+                System.out.println("Error: " + e);
+            }
+        }
+    }
+
+    private void viewProductsByCategory() {
+        connect.viewCategories();
+        String auxCategory = new String("");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        while (true) { //quit via "cancel", as always
+            try {
+                System.out.println("Which category would you like to view? Type \"cancel\" if you wish to quit.");
+                auxCategory = reader.readLine();
+                while(auxCategory.equals("") || connect.searchCategory(auxCategory) == false){
+                    if(auxCategory.toLowerCase().equals("cancel"))
+                        return;
+                    System.out.println("Must be a valid category.");
+                    auxCategory = reader.readLine();
+                }
+                if(auxCategory.equals("cancel"))
+                    return;
+                connect.viewProductsByCategory(auxCategory);
+            } catch (Exception e) {
+                System.out.println("Could not read line in Shop.viewProductsByCategory()");
+                System.out.println("Error: " + e);
+            }
+        }
+    }
+
+    private void orderProduct(String currentUser) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String auxName = new String("");
+        String aux;
+        Product auxProduct;
+        int quantity;
+        while (true) {
+            try {
+                System.out.println("Which product would you like to order? Type \"cancel\" if you wish to quit.");
+                auxName = reader.readLine();
+                while ( (auxProduct = connect.getProduct(auxName)) == null) {
+                    if(auxName.toLowerCase().equals("cancel"))
+                        return;
+                    System.out.println("Product must exist.");
+                    auxName = reader.readLine();
+                }
+                System.out.println("The " + auxName + " is " + auxProduct.getPrice() + " Zimbabwean dollars. How many would you like to order?");
+                quantity = Integer.parseInt(reader.readLine());
+                while(quantity < 0){
+                    System.out.println("You must order at least one product.");
+                    quantity = Integer.parseInt(reader.readLine());
+                }
+                System.out.println("That is " + quantity + " " + auxName + " for a total price of " + quantity*auxProduct.getPrice()+", would you like to add this order to your cart?");
+                aux = reader.readLine();
+                while(!aux.toLowerCase().equals("y") && !aux.toLowerCase().equals("yes") &&
+                        !aux.toLowerCase().equals("n") && !aux.toLowerCase().equals("no")){
+                    aux = reader.readLine();
+                }
+                if(aux.toLowerCase().equals("y") || aux.toLowerCase().equals("yes")){
+                    if(connect.addToCart(auxProduct, currentUser, quantity) == true)
+                        System.out.println("Your order has been placed in your cart!");
+                    else
+                        System.out.println("There is a problem with our servers. Please try again later.");
+                }
+            } catch (Exception e) {
+                System.out.println("Error: " + e);
+            }
+        }
     }
 }
