@@ -1,5 +1,7 @@
 import org.jasypt.util.password.BasicPasswordEncryptor;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -198,17 +200,84 @@ public class DbConnect {
         }
     }
 
-    public boolean addToCart(Product auxProduct, String clientEmail, int quantity){
+    public boolean addToCart(Product auxProduct, String currentUser, int quantity){
         try {
             st.executeUpdate("INSERT into TRANSACTION(product_name, client_email, price_total, quantity, status, date) values ('" +
-            auxProduct.getName() + "', '" +
-            clientEmail + "', " +
+            auxProduct.getName() + "', " +
+                    "(SELECT email FROM client WHERE username = '" + currentUser +"'), " +
             quantity*auxProduct.getPrice() + ", " +
             quantity + ", 'cart', (select SYSDATE()) )");
             return true;
         } catch(NullPointerException|SQLException s){
             System.out.println("Error in DbConnect.insertProduct: " + s);
             return false;
+        }
+    }
+
+    public void viewShoppingBasket(String currentUser){
+        String aux = new String("");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        int priceSum = 0;
+        try {
+            rs = st.executeQuery("SELECT * FROM transaction WHERE client_email = ( SELECT email FROM client WHERE username = '" + currentUser + "' ) AND status = 'cart'");
+            while(rs.next()){
+                System.out.println(rs.getInt("id") + ". Product name: \"" + rs.getString("product_name") + "\"; Quantity: " + rs.getInt("quantity") + "; Price total: " + rs.getInt("price_total"));
+                priceSum += rs.getInt("price_total");
+            }
+            if(priceSum != 0){
+                System.out.println("Cart price total = " + priceSum);
+                System.out.println("Would you like to confirm your purchase? Y/N");
+                try {
+                    aux = reader.readLine();
+                    while (!aux.toLowerCase().equals("y") && !aux.toLowerCase().equals("yes") &&
+                            !aux.toLowerCase().equals("n") && !aux.toLowerCase().equals("no")) {
+                        aux = reader.readLine();
+                    }
+                } catch(Exception e){
+                    System.out.println("Error: " + e);
+                }
+                if(aux.toLowerCase().equals("y") || aux.toLowerCase().equals("yes")){
+                    if(changeOrderStatus(currentUser, "pending") == true)
+                        System.out.println("Your order is now pending, thank you for shopping with us!");
+                    else
+                        System.out.println("There is a problem with our servers, please try again later.");
+                }
+            }else{
+                System.out.println("You have nothing in your shopping basket, and that makes us sad :(");
+            }
+        } catch(NullPointerException|SQLException s){
+            System.out.println("Error in DbConnect.insertProduct: " + s);
+            return;
+        }
+    }
+
+    private boolean changeOrderStatus(String currentUser, String newStatus) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        try { //UPDATE shop.transaction SET status = 'pending' WHERE (SELECT username FROM client WHERE email = 'randy@email.com') = 'randysavage';
+            st.executeUpdate("UPDATE transaction SET status = 'pending' WHERE (SELECT email FROM client WHERE username = '" + currentUser + "') = client_email");
+            return true;
+        } catch (NullPointerException | SQLException s) {
+            System.out.println("Error in DbConnect.insertProduct: " + s);
+            return false;
+        }
+    }
+
+    public void viewShoppingHistory(String currentUser){
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        int priceSum = 0;
+        try {
+            rs = st.executeQuery("SELECT * FROM transaction WHERE client_email = ( SELECT email FROM client WHERE username = '" + currentUser + "' ) AND NOT status = 'cart'");
+            while(rs.next()){
+                System.out.println(rs.getInt("id") + ". Product name: \"" + rs.getString("product_name") + "\"; Quantity: " + rs.getInt("quantity") + "; Price total: " + rs.getInt("price_total"));
+                priceSum += rs.getInt("price_total");
+            }
+            if(priceSum == 0){
+                System.out.println("You never ordered anything from us, and that makes us sad :(");
+            }else
+                System.out.println("Price total = " + priceSum);
+        } catch(NullPointerException|SQLException s){
+            System.out.println("Error in DbConnect.insertProduct: " + s);
+            return;
         }
     }
 

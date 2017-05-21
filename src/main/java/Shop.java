@@ -70,8 +70,8 @@ public class Shop {
                 System.out.println("Please select an option:");
                 System.out.println("1. View products by category.\n" +
                         "2. Order a product.\n" +
-                        "3. View shopping basket. (not implemented)\n" +
-                        "4. Confirm order. (not implemented)\n" +
+                        "3. View shopping basket / confirm order.\n" +
+                        "4. View shopping history. (not implemented)\n" +
                         "5. Logout.");
                 try {
                     val = Integer.parseInt(reader.readLine());
@@ -86,8 +86,10 @@ public class Shop {
                             orderProduct(currentUser);
                             break;
                         case 3:
+                            connect.viewShoppingBasket(currentUser);
                             break;
                         case 4:
+                            connect.viewShoppingHistory(currentUser);
                             break;
                         case 5:
                             return;
@@ -105,7 +107,7 @@ public class Shop {
                             "2. Add new clothing categories.\n" +
                             "3. Add new clothes in store categories.\n" +
                             "4. View existing categories.\n" +
-                            "5. View pending orders. (not implemented)\n" +
+                            "5. View shopping cart.\n" +
                             "6. View order history. (not implemented)\n" +
                             "7. Logout.\n");
                 }else
@@ -229,11 +231,13 @@ public class Shop {
             try {
                 System.out.println("Which product would you like to order? Type \"cancel\" if you wish to quit.");
                 auxName = reader.readLine();
+                if(auxName.toLowerCase().equals("cancel"))
+                    return;
                 while ( (auxProduct = connect.getProduct(auxName)) == null) {
-                    if(auxName.toLowerCase().equals("cancel"))
-                        return;
                     System.out.println("Product must exist.");
                     auxName = reader.readLine();
+                    if(auxName.toLowerCase().equals("cancel"))
+                        return;
                 }
                 System.out.println("The " + auxName + " is " + auxProduct.getPrice() + " Zimbabwean dollars. How many would you like to order?");
                 quantity = Integer.parseInt(reader.readLine());
