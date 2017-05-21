@@ -1,3 +1,4 @@
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.jasypt.util.password.BasicPasswordEncryptor;
 
 import java.io.BufferedReader;
@@ -253,8 +254,8 @@ public class DbConnect {
 
     private boolean changeOrderStatus(String currentUser, String newStatus) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        try { //UPDATE shop.transaction SET status = 'pending' WHERE (SELECT username FROM client WHERE email = 'randy@email.com') = 'randysavage';
-            st.executeUpdate("UPDATE transaction SET status = 'pending' WHERE (SELECT email FROM client WHERE username = '" + currentUser + "') = client_email");
+        try {
+            st.executeUpdate("UPDATE transaction SET status = '" + newStatus + "' WHERE (SELECT email FROM client WHERE username = '" + currentUser + "') = client_email");
             return true;
         } catch (NullPointerException | SQLException s) {
             System.out.println("Error in DbConnect.insertProduct: " + s);
@@ -275,6 +276,53 @@ public class DbConnect {
                 System.out.println("You never ordered anything from us, and that makes us sad :(");
             }else
                 System.out.println("Price total = " + priceSum);
+        } catch(NullPointerException|SQLException s){
+            System.out.println("Error in DbConnect.insertProduct: " + s);
+            return;
+        }
+    }
+
+    public void viewPendingOrders(){
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String auxEmail = new String("");
+        Boolean orderExists = false;
+        try {
+            rs = st.executeQuery("SELECT * FROM transaction WHERE status = 'pending'");
+            while(rs.next()){
+                System.out.println(rs.getInt("id") + ". Client email: \"" + rs.getString("client_email") + "\"; Product name: \"" + rs.getString("product_name") + "\"; Quantity: " + rs.getInt("quantity") + "; Price total: " + rs.getInt("price_total"));
+                orderExists = true;
+            }
+            if(orderExists == true){
+                System.out.println("Please enter the email of a client who's order you would like to confirm, or type \"cancel\" if you wish to quit.");
+                try {
+                    auxEmail = reader.readLine();
+                    if(auxEmail.toLowerCase().equals("cancel"))
+                        return;
+                    rs = st.executeQuery("SELECT username FROM client WHERE email = '" + auxEmail + "'");
+                    rs.next();
+                    if( changeOrderStatus(rs.getString("username"), "completed" ) == true )
+                        System.out.println("Order confirmed succesfully.");
+                    else
+                        System.out.println("There was an error.");
+                } catch(Exception e){
+                    System.out.println("Error: " + e);
+                }
+            }else
+                System.out.println("Nobody shopped here. Ever.");
+        } catch(NullPointerException|SQLException s){
+            System.out.println("Error: " + s);
+            return;
+        }
+    }
+
+    public void viewOrderHistory(){
+        int priceSum = 0;
+        try {
+            rs = st.executeQuery("SELECT * FROM transaction WHERE status = 'completed'");
+            while(rs.next()){
+                System.out.println(rs.getInt("id") + ". Product name: \"" + rs.getString("product_name") + "\"; Quantity: " + rs.getInt("quantity") + "; Price total: " + rs.getInt("price_total"));
+                priceSum += rs.getInt("price_total");
+            }
         } catch(NullPointerException|SQLException s){
             System.out.println("Error in DbConnect.insertProduct: " + s);
             return;

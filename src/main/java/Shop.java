@@ -71,7 +71,7 @@ public class Shop {
                 System.out.println("1. View products by category.\n" +
                         "2. Order a product.\n" +
                         "3. View shopping basket / confirm order.\n" +
-                        "4. View shopping history. (not implemented)\n" +
+                        "4. View shopping history.\n" +
                         "5. Logout.");
                 try {
                     val = Integer.parseInt(reader.readLine());
@@ -100,15 +100,15 @@ public class Shop {
         } else
         if(adminRights == true) { //Administrator Screen
             while (true) {
-                if(val != 4 && val !=5 && val != 6) {
+                if(val != 4 && val != 6) {
                     System.out.println("Welcome " + currentUser);
                     System.out.println("Please select an option:");
                     System.out.println("1. Register new client user.\n" +
                             "2. Add new clothing categories.\n" +
                             "3. Add new clothes in store categories.\n" +
                             "4. View existing categories.\n" +
-                            "5. View shopping cart.\n" +
-                            "6. View order history. (not implemented)\n" +
+                            "5. View pending orders.\n" +
+                            "6. View order history.\n" +
                             "7. Logout.\n");
                 }else
                     System.out.println("Please select an option:");
@@ -131,11 +131,12 @@ public class Shop {
                             connect.viewCategories();
                             break;
                         case 5:
+                            connect.viewPendingOrders();
                             break;
                         case 6:
+                            connect.viewOrderHistory();
                             break;
                         case 7:
-                            System.out.println("RETURN!");
                             return;
                         default:
                             System.out.println("Invalid option");
